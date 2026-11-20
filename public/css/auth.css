@@ -1,0 +1,40 @@
+/* Halaman Masuk dan Daftar. Kolom isian, tombol, dan pesan ada di base.css. */
+
+.auth {
+  max-width: var(--lebar-auth);
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+}
+
+.auth h1 { margin-bottom: 24px; }
+
+/* kotak centang: seluruh baris bisa diklik, tinggi minimal 48px */
+.ingat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-bottom: 8px;
+}
+.ingat input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--brand);
+  cursor: pointer;
+}
+
+.form-auth .tombol-auth {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 8px;
+  background: var(--cta);
+}
+.form-auth .tombol-auth:hover { background: var(--cta-strong); }
+
+.alihan { margin-top: 24px; color: var(--mute); text-align: center; }
+.alihan a { color: var(--brand); font-weight: 600; }
+.alihan a:hover { color: var(--brand-strong); }
+
+@media (max-width: 720px) {
+  .auth { padding-top: 40px; }
+}
