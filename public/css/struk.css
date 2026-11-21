@@ -1,0 +1,221 @@
+/* Struk pesanan. Dipakai admin (Kelola pesanan) dan pelanggan (Cek pesanan), satu tampilan untuk keduanya.
+   Alasan keputusan desain:
+   - Lebar kertas 80mm (302px), ukuran roll printer thermal yang umum di kasir laundry. Di layar, kertas
+     tampil selebar itu juga supaya yang dilihat sama dengan yang tercetak. Di layar sempit ia mengecil
+     mengikuti lebar layar.
+   - Satu kolom, satu aliran dari atas ke bawah: siapa, apa, berapa, sudah dibayar atau belum. Garis putus-putus
+     memisahkan kelompok, seperti struk kasir, tanpa kotak dan tanpa bayangan (aturan dasar proyek ini).
+   - Nominal rata kanan dengan angka lebar sama (tabular-nums), jadi kolom rupiah bisa dijumlahkan dengan mata.
+   - Warna hanya untuk layar. Saat tercetak semuanya hitam di atas putih, karena printer thermal tidak punya warna
+     dan abu-abu muda di atasnya hilang. Satu-satunya penekanan di kertas adalah bobot huruf: nama dan total. */
+
+/* base.css memberi body tata letak flex untuk navbar samping. Halaman ini tidak punya navbar, jadi
+   dikembalikan ke blok supaya struk bisa di tengah. */
+.halaman-struk { display: block; background: var(--bg); }
+
+.struk-halaman {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px 16px 0;
+}
+
+/* ---------- alat: hanya di layar ----------
+   Di bawah struk, selebar kertasnya, dua tombol sebaris supaya tidak menambah tinggi halaman.
+   Struknya sekitar 800px, lebih tinggi dari banyak layar laptop dan ponsel. Karena itu tombol menempel
+   di dasar layar: kalau struk muat, ia diam tepat di bawah struk; kalau tidak, ia tetap terlihat dan
+   struk bergulir di belakangnya, jadi Cetak struk tidak pernah hilang di bawah lipatan. */
+
+.struk-alat {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 8px;
+  width: min(302px, 100%);
+  padding: 12px 0 16px;
+  background: var(--bg);
+}
+.struk-alat .tombol { flex: 1 1 auto; }
+.struk-alat .tombol-garis,
+.struk-alat .tombol { white-space: nowrap; }
+
+/* ---------- kertas ---------- */
+
+.struk {
+  width: min(302px, 100%);
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--t-kecil);
+  line-height: 1.5;
+}
+
+.struk-kepala { text-align: center; padding-bottom: 14px; }
+.struk .struk-kepala h1 {
+  color: var(--ink);
+  font-size: var(--t-sedang);
+  letter-spacing: -0.01em;
+}
+.struk-kepala p { color: var(--mute); }
+.struk-alamat { display: flex; flex-direction: column; margin-top: 8px; color: var(--mute); font-style: normal; }
+
+/* kelompok dipisah garis putus-putus */
+.struk-baris,
+.struk-bagian,
+.struk-kaki {
+  padding: 14px 0;
+  border-top: 1px dashed var(--line-input);
+}
+
+.struk-bagian p { overflow-wrap: anywhere; }
+.struk-nama { color: var(--ink); font-weight: 600; }
+.struk-catatan { margin-top: 8px; color: var(--mute); }
+
+.struk-baris > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.struk-baris > div + div { margin-top: 4px; }
+.struk-bagian .struk-baris { padding: 8px 0 0; border-top: 0; }
+
+.struk-baris dt { color: var(--mute); }
+.struk-baris dd {
+  color: var(--ink);
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.struk-belum { color: var(--mute); font-weight: 400; }
+
+.struk-total dt { color: var(--ink); font-size: var(--t-isi); font-weight: 600; }
+.struk-total dd { font-size: var(--t-sedang); font-weight: 700; letter-spacing: -0.01em; }
+
+.struk-kaki { text-align: center; color: var(--mute); }
+.struk-kaki p { text-wrap: balance; }
+.struk-cetak { margin-top: 8px; font-size: 12px; }
+
+/* ---------- cetak ---------- */
+
+@page { size: 80mm auto; margin: 4mm; }
+
+@media print {
+  .halaman-struk { background: #fff; }
+  .struk-halaman { display: block; min-height: 0; padding: 0; }
+  .struk-alat { display: none; }
+
+  .struk {
+    width: 100%;
+    max-width: 72mm;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+    font-size: 10.5pt;
+  }
+
+  .struk,
+  .struk * { color: #000 !important; }
+
+  .struk-baris,
+  .struk-bagian,
+  .struk-kaki { border-top-color: #000; }
+
+  .struk .struk-kepala h1 { font-size: 15pt; }
+  .struk-total dt { font-size: 11pt; }
+  .struk-total dd { font-size: 14pt; }
+  .struk-cetak { font-size: 9pt; }
+
+  /* Satu struk tidak boleh terpotong di tengah kelompok. */
+  .struk-bagian,
+  .struk-baris,
+  .struk-kaki { break-inside: avoid; }
+}
+
+/* ---------- popup struk (Cek pesanan) ----------
+   Struk dibuka di atas halaman, bukan pindah halaman, supaya pelanggan tetap di daftar pesanannya.
+   Latar di belakang diburamkan: fokus ke kertas struk, dan isi halaman di belakangnya tidak ikut terbaca.
+   Blur hanya dipakai di satu tempat ini. Kotaknya sendiri tetap solid, tanpa bayangan. */
+
+.dialog-struk[open] {
+  display: flex;
+  flex-direction: column;
+  width: min(380px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.dialog-struk::backdrop {
+  background-color: rgba(15, 27, 45, 0);
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  transition:
+    background-color var(--gerak-sedang),
+    backdrop-filter var(--gerak-sedang),
+    overlay var(--gerak-sedang) allow-discrete, display var(--gerak-sedang) allow-discrete;
+}
+.dialog-struk[open]::backdrop {
+  background-color: rgba(15, 27, 45, 0.4);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+@starting-style {
+  .dialog-struk[open]::backdrop {
+    background-color: rgba(15, 27, 45, 0);
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
+/* Struk bergulir sendiri kalau layar pendek, tombolnya tetap di dasar popup. */
+.struk-popup-isi { flex: 1 1 auto; min-height: 0; padding: 24px 24px 8px; overflow-y: auto; }
+.dialog-struk .struk { width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.struk-popup-pesan { color: var(--mute); }
+.struk-popup-pesan a { color: var(--brand); font-weight: 600; }
+
+.struk-popup-alat {
+  display: flex;
+  gap: 8px;
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--line);
+}
+.struk-popup-alat .tombol,
+.struk-popup-alat .tombol-garis { flex: 1 1 auto; white-space: nowrap; }
+.struk-popup-alat [hidden] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-struk::backdrop { transition: none; }
+}
+
+@media print {
+  /* Dicetak dari popup: sembunyikan halaman di belakang dan tombol, sisakan struknya saja. */
+  body:has(.dialog-struk[open]) .navbar,
+  body:has(.dialog-struk[open]) .status > :not(dialog),
+  body:has(.dialog-struk[open]) dialog:not(.dialog-struk) { display: none !important; }
+
+  body:has(.dialog-struk[open]) .status { max-width: none; padding: 0; }
+
+  .dialog-struk[open] {
+    display: block;
+    position: static;
+    width: 100%;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    overflow: visible;
+    opacity: 1;
+    transform: none;
+  }
+  .dialog-struk::backdrop { display: none; }
+  .struk-popup-isi { padding: 0; overflow: visible; }
+  .struk-popup-alat { display: none; }
+}

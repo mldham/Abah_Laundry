@@ -1,0 +1,68 @@
+/* Halaman Bayar. Kartu pesanan dan rincian dipakai bersama Cek Pesanan (status.css);
+   warna, tombol, dan kabar ada di base.css. */
+
+.bayar {
+  max-width: var(--lebar-baca);
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+.kembali {
+  display: inline-block;
+  padding: 12px 0;
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: none;
+}
+.kembali:hover { color: var(--brand-strong); }
+
+.bayar h1 { margin: 8px 0 24px; }
+
+.judul-kartu {
+  margin: 0 0 24px;
+  font-size: var(--t-sedang);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+/* kode QRIS: latar putih penuh dan tepi 16px supaya kamera ponsel membacanya, termasuk di mode gelap */
+.qris {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+.qris h2 { margin: 0 0 24px; font-size: var(--t-sedang); }
+
+.qris-kode {
+  width: min(100%, 320px);
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: #fff;
+}
+.qris-kode svg { display: block; width: 100%; height: auto; }
+
+.qris-nominal {
+  margin: 16px 0 0;
+  font-size: var(--t-sedang);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.qris-penerima { margin: 4px 0 0; color: var(--mute); font-size: var(--t-kecil); }
+
+.langkah {
+  margin: 24px 0;
+  padding-left: 24px;
+  color: var(--mute);
+  text-align: left;
+}
+.langkah li + li { margin-top: 8px; }
+
+.bayar-galat { margin: 32px 0 0; }
+
+@media (max-width: 560px) {
+  .bayar { padding-top: 32px; }
+}

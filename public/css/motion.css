@@ -1,0 +1,372 @@
+/* Gerak untuk Laundry Abah. Dimuat setelah base.css di semua halaman (layouts/app dan errors/layout).
+   Warna, bentuk, dan jarak tetap di base.css. Berkas ini hanya mengatur perpindahan antar keadaan.
+
+   Alasan keputusan gerak (tiap gerak harus punya tujuan, kalau tidak dibuang):
+   - Tidak ada gerak yang berputar tanpa henti. Semua jalan sekali, dipicu oleh halaman dimuat,
+     aksi pengguna, atau perubahan keadaan. Satu-satunya pengulangan adalah putaran kecil di
+     tombol yang sedang memproses (menandakan "sedang bekerja"), dan putarannya berhenti saat selesai.
+   - Hanya transform dan opacity yang digerakkan, jadi tidak ada tata letak yang bergeser (CLS 0)
+     dan prosesor tidak bekerja berat. Pengecualian kecil: garis progres di Cek pesanan.
+   - Tanpa bayangan dan tanpa glow baru, sesuai base.css: kenaikan 2px dan perubahan warna
+     sudah cukup untuk menunjukkan "ini bisa ditekan".
+   - Lama gerak: 120-200ms untuk respons sentuhan, 300-450ms untuk kemunculan. Lebih dari itu
+     terasa menahan pengguna.
+   - Pengguna yang meminta gerak dikurangi (prefers-reduced-motion) mendapat halaman tanpa
+     gerak sama sekali, lihat blok paling bawah. */
+
+:root {
+  --ease-keluar: cubic-bezier(0.22, 1, 0.36, 1);   /* melambat di ujung: terasa "mendarat" */
+  --ease-pegas: cubic-bezier(0.34, 1.56, 0.64, 1); /* sedikit melampaui lalu kembali: terasa hidup */
+  --gerak-cepat: 150ms;
+  --gerak-sedang: 250ms;
+  --gerak-masuk: 450ms;
+}
+
+/* Anchor di ringkasan galat melompat ke kolom isian. Digulir halus, dan berhenti di bawah navbar
+   yang menempel supaya kolom tidak tertutup. */
+html { scroll-padding-top: calc(var(--nav-h) + 16px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+/* ---------- 1. kemunculan halaman ----------
+   Tujuan: setelah pindah halaman, mata diarahkan dari judul ke bawah, bukan dihadapkan pada
+   layar yang berganti sekaligus. Navbar tidak bergerak supaya terasa sebagai bingkai yang tetap.
+   Jeda antar elemen 60ms, maksimal tujuh elemen. */
+
+@keyframes masuk {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
+.form-order > :not(.bagian-layanan),
+.status > :not(dialog),
+.auth > *,
+.halaman-galat > *,
+.bantuan > h1,
+.bantuan > .pengantar,
+.admin-heading,
+.admin-panel {
+  animation: masuk var(--gerak-masuk) var(--ease-keluar) backwards;
+}
+
+.form-order > :nth-child(2), .status > :nth-child(2), .auth > :nth-child(2),
+.halaman-galat > :nth-child(2), .bantuan > .pengantar, .admin-panel { animation-delay: 60ms; }
+.form-order > :nth-child(3), .status > :nth-child(3), .auth > :nth-child(3),
+.halaman-galat > :nth-child(3) { animation-delay: 120ms; }
+.form-order > :nth-child(4), .status > :nth-child(4) { animation-delay: 180ms; }
+.form-order > :nth-child(5), .status > :nth-child(5) { animation-delay: 240ms; }
+.form-order > :nth-child(6), .status > :nth-child(6) { animation-delay: 300ms; }
+.form-order > :nth-child(n + 7), .status > :nth-child(n + 7) { animation-delay: 360ms; }
+
+/* Kartu layanan masuk satu per satu: pilihan terbaca berurutan dari atas ke bawah.
+   Dimulai setelah judul selesai muncul. */
+.jenis-layanan { animation: masuk var(--gerak-masuk) var(--ease-keluar) backwards; }
+.jenis-layanan:nth-child(1) { animation-delay: 160ms; }
+.jenis-layanan:nth-child(2) { animation-delay: 220ms; }
+.jenis-layanan:nth-child(3) { animation-delay: 280ms; }
+.jenis-layanan:nth-child(n + 4) { animation-delay: 340ms; }
+
+/* ---------- 2. navbar ----------
+   Tujuan: logo adalah satu-satunya tempat bermain di navbar (gelembung di logo, tombol ke
+   beranda). Di bilah atas layar kecil, garis bawah navy gelap muncul saat halaman digulir supaya jelas
+   ada isi yang lewat di bawahnya. Sisi kiri di layar lebar tidak punya garis bawah, jadi tidak berubah.
+   Laci menu di layar kecil naik dari kiri dalam 250ms dan latarnya menggelap. Hanya transform dan visibility
+   yang bergerak. Visibility menunggu laci selesai bergeser saat menutup, supaya laci tidak lenyap lebih dulu. */
+
+.navbar { transition: border-color var(--gerak-sedang); }
+.navbar[data-gulir] { border-bottom-color: var(--brand-strong); }
+
+.navbar[data-drawer] nav {
+  transition: transform var(--gerak-sedang) var(--ease-keluar), visibility 0s linear var(--gerak-sedang);
+}
+.navbar[data-drawer][data-buka] nav {
+  transition: transform var(--gerak-sedang) var(--ease-keluar), visibility 0s;
+}
+
+@keyframes latar-masuk {
+  from { opacity: 0; }
+}
+.navbar[data-drawer][data-buka]::after { animation: latar-masuk var(--gerak-sedang) ease-out; }
+
+.navbar .merek img { transition: transform var(--gerak-sedang) var(--ease-pegas); }
+.navbar .merek:hover img { transform: rotate(-8deg) scale(1.08); }
+
+/* ---------- 3. tombol ----------
+   Tujuan: tombol naik 1px saat didekati dan turun saat ditekan, jadi terasa ada yang ditekan. */
+
+.tombol,
+.tombol-garis,
+.tombol-bahaya-isi,
+.tombol-simpan,
+.tombol-hapus,
+.tombol-batal {
+  transition:
+    background-color var(--gerak-cepat), border-color var(--gerak-cepat), color var(--gerak-cepat),
+    transform var(--gerak-cepat) var(--ease-keluar);
+}
+
+.tombol:hover:not(:disabled),
+.tombol-garis:hover:not(:disabled),
+.tombol-bahaya-isi:hover:not(:disabled),
+.tombol-simpan:hover:not(:disabled),
+.tombol-hapus:hover:not(:disabled),
+.tombol-batal:hover:not(:disabled) { transform: translateY(-1px); }
+
+.tombol:active:not(:disabled),
+.tombol-garis:active:not(:disabled),
+.tombol-bahaya-isi:active:not(:disabled),
+.tombol-simpan:active:not(:disabled),
+.tombol-hapus:active:not(:disabled),
+.tombol-batal:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
+
+/* Tombol yang sedang memproses (app.js dan admin.js memberi data-teks-awal saat mengunci).
+   Tujuan: teks "Mengirim pesanan..." saja mudah terlewat. Cincin kecil yang berputar menunjukkan
+   permintaan sedang berjalan dan jangan ditekan lagi. Hilang bersama kuncinya. */
+@keyframes putar { to { transform: rotate(360deg); } }
+
+button[data-teks-awal]::before {
+  content: "";
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  margin-right: 10px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: -0.15em;
+  animation: putar 0.7s linear infinite;
+}
+
+/* Simpan di baris admin selebar tetap (96px). "Menyimpan..." lebih lebar dari itu dan akan
+   mendorong Hapus serta melebarkan kolom tabel, jadi saat memproses teksnya disembunyikan dan
+   cincin saja yang tampil di tengah. Teks tetap ada untuk pembaca layar. */
+.aksi-pesanan .tombol-simpan[data-teks-awal] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+}
+.aksi-pesanan .tombol-simpan[data-teks-awal]::before { width: 16px; height: 16px; margin: 0; }
+
+/* ---------- 4. kolom isian ----------
+   Tujuan: fokus berpindah dengan jelas. Cincin fokus memudar masuk, dan label ikut berwarna
+   sehingga terlihat kolom mana yang sedang diisi. */
+
+.grup-form input,
+.grup-form textarea,
+.grup input {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  transition: border-color var(--gerak-cepat), outline-color var(--gerak-sedang);
+}
+
+.grup-form input:focus-visible,
+.grup-form textarea:focus-visible,
+.grup input:focus-visible { outline-color: var(--brand); }
+
+.grup-form label,
+.grup label { transition: color var(--gerak-cepat); }
+
+.grup-form:focus-within > label,
+.grup:focus-within > label { color: var(--brand-strong); }
+
+/* Galat. Tujuan: menunjukkan di kolom mana yang salah. Kolom bergetar sekali setelah halaman
+   selesai muncul (jeda 300ms), teks galatnya turun dari atas. */
+@keyframes getar {
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+@keyframes turun {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+
+.grup-form input[aria-invalid="true"],
+.grup-form textarea[aria-invalid="true"],
+.grup input[aria-invalid="true"] { animation: getar 400ms ease-out 300ms; }
+
+.galat { animation: turun var(--gerak-sedang) var(--ease-keluar) 350ms backwards; }
+
+/* ---------- 5. pilihan layanan ----------
+   Tujuan: memastikan pilihan "tercatat". Kartu naik 2px saat didekati, penanda membal sekali
+   saat dipilih, dan gambar sedikit membesar supaya pilihan terasa menonjol dari yang lain. */
+
+.jenis-layanan label {
+  transition:
+    border-color var(--gerak-cepat), background-color var(--gerak-cepat),
+    box-shadow var(--gerak-cepat), transform var(--gerak-sedang) var(--ease-keluar);
+}
+.jenis-layanan label:hover { transform: translateY(-2px); }
+.jenis-layanan label:active { transform: translateY(0) scale(0.99); }
+
+.jenis-layanan label::after {
+  transition:
+    border-color var(--gerak-cepat), background-color var(--gerak-cepat),
+    box-shadow var(--gerak-sedang) var(--ease-keluar);
+}
+
+@keyframes pilih {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.jenis-layanan input:checked + label::after { animation: pilih 380ms var(--ease-keluar); }
+
+.ikon-layanan { transition: transform var(--gerak-sedang) var(--ease-pegas); }
+.jenis-layanan label:hover .ikon-layanan { transform: scale(1.04); }
+.jenis-layanan input:checked + label .ikon-layanan { transform: scale(1.06) rotate(-2deg); }
+
+/* ---------- 6. kabar dan konfirmasi ----------
+   Tujuan: umpan balik setelah aksi harus terlihat muncul, bukan sudah ada begitu saja.
+   Kotak .kabar ikut aturan kemunculan halaman di atas. Pita biru di dalam kartu muncul belakangan,
+   setelah kartunya sendiri. Kartu pesanan yang baru masuk juga disorot sekali: garisnya biru lalu kembali netral,
+   jadi mata langsung tahu "inilah pesananmu barusan". */
+
+.kabar-kartu { animation: turun var(--gerak-masuk) var(--ease-keluar) 400ms backwards; }
+
+@keyframes sorot-kartu {
+  from { border-color: var(--brand); }
+}
+
+.pesanan:has(.kabar-kartu) {
+  animation:
+    masuk var(--gerak-masuk) var(--ease-keluar) 120ms backwards,
+    sorot-kartu 1800ms ease-out 400ms backwards;
+}
+
+/* ---------- 7. progres pesanan ----------
+   Tujuan: tahap yang sudah lewat "terisi" berurutan dari kiri ke kanan, jadi progres terbaca
+   sebagai perjalanan, bukan deretan titik. Penunjuk tahap sekarang membal lalu cincinnya
+   melebar sekali. Urutan (--i) diisi di data-order.blade.php. Dimulai setelah kartu muncul. */
+
+@keyframes titik {
+  from { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.25); }
+}
+
+@keyframes isi-garis {
+  from { background-size: 0% 100%; }
+}
+
+@keyframes cincin {
+  from { box-shadow: 0 0 0 0 var(--brand-tint-2); }
+}
+
+.tahap li.lewat::before,
+.tahap li.sekarang::before {
+  animation: titik 400ms var(--ease-keluar) calc(350ms + var(--i, 0) * 180ms) backwards;
+}
+
+.tahap li.sekarang::before {
+  animation:
+    titik 400ms var(--ease-keluar) calc(350ms + var(--i, 0) * 180ms) backwards,
+    cincin 600ms ease-out calc(550ms + var(--i, 0) * 180ms) backwards;
+}
+
+.tahap li.lewat::after {
+  background-color: var(--line);
+  background-image: linear-gradient(var(--brand), var(--brand));
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  animation: isi-garis 450ms var(--ease-keluar) calc(450ms + var(--i, 0) * 180ms) backwards;
+}
+
+/* ---------- 8. dialog ----------
+   Tujuan: dialog yang muncul tiba-tiba terasa mengagetkan, apalagi dialog pembatalan.
+   Kotak naik sambil membesar sedikit, latar menggelap pelan. Keluarnya juga dianimasikan
+   (browser lama melewati gerak ini dan tetap berfungsi). */
+
+dialog {
+  opacity: 0;
+  transform: translateY(12px) scale(0.97);
+  transition:
+    opacity var(--gerak-sedang), transform var(--gerak-sedang) var(--ease-keluar),
+    overlay var(--gerak-sedang) allow-discrete, display var(--gerak-sedang) allow-discrete;
+}
+
+dialog[open] { opacity: 1; transform: none; }
+
+dialog::backdrop {
+  background-color: rgba(15, 27, 45, 0);
+  transition:
+    background-color var(--gerak-sedang),
+    overlay var(--gerak-sedang) allow-discrete, display var(--gerak-sedang) allow-discrete;
+}
+
+dialog[open]::backdrop { background-color: rgba(15, 27, 45, 0.55); }
+
+@starting-style {
+  dialog[open] { opacity: 0; transform: translateY(12px) scale(0.97); }
+  dialog[open]::backdrop { background-color: rgba(15, 27, 45, 0); }
+}
+
+/* ---------- 9. gulir ----------
+   Tujuan: halaman Bantuan panjang. Bagian di bawah layar muncul saat didatangi, jadi
+   pembaca punya irama. app.js hanya memberi .reveal pada bagian yang belum terlihat,
+   jadi tanpa JavaScript semuanya tampil biasa. */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--gerak-masuk), transform var(--gerak-masuk) var(--ease-keluar);
+}
+.reveal.tampak { opacity: 1; transform: none; }
+
+/* ---------- 10. admin ----------
+   Tujuan: pita notifikasi turun dari bawah navbar lalu naik lagi saat selesai, bukan
+   muncul dan lenyap. Baris yang baru diubah menyala biru muda lalu mereda, supaya mata
+   menemukannya di tabel panjang. admin.js menambah .keluar sebelum membuang pita. */
+
+@keyframes notifikasi-masuk {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+}
+
+@keyframes notifikasi-keluar {
+  to { opacity: 0; transform: translate(-50%, -16px); }
+}
+
+.notifikasi { animation: notifikasi-masuk var(--gerak-masuk) var(--ease-keluar) backwards; }
+.notifikasi.keluar { animation: notifikasi-keluar var(--gerak-sedang) ease-in forwards; }
+
+@keyframes sorot-baris {
+  from { background-color: var(--brand-tint-2); }
+}
+
+.baris-baru > td { animation: sorot-baris 1400ms ease-out 200ms backwards; }
+
+/* ---------- gerak dikurangi ----------
+   Pengguna yang menyalakan "kurangi gerak" di perangkatnya mendapat perpindahan instan.
+   Warna tetap berubah (hover, fokus) karena itu informasi, bukan hiasan. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+
+  .tombol:hover:not(:disabled),
+  .tombol-garis:hover:not(:disabled),
+  .tombol-bahaya-isi:hover:not(:disabled),
+  .tombol-simpan:hover:not(:disabled),
+  .tombol-hapus:hover:not(:disabled),
+  .tombol-batal:hover:not(:disabled),
+  .jenis-layanan label:hover,
+  .navbar .merek:hover img { transform: none; }
+
+  /* cincin berputar tidak ada gunanya tanpa gerak: teks "Memproses..." sudah cukup */
+  button[data-teks-awal]::before { display: none; }
+  .aksi-pesanan .tombol-simpan[data-teks-awal] { font-size: var(--t-kecil); }
+
+  .reveal { opacity: 1; transform: none; }
+}

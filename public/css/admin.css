@@ -1,0 +1,616 @@
+/* Halaman admin. Gaya dasar, tombol, skala huruf, dan kabar ada di base.css.
+
+   Alasan keputusan desain:
+   - Halaman ini alat kerja harian di layar lebar, jadi isi tabel 16px dan semua kontrol di dalam
+     baris (kolom berat, pilihan status, Simpan, Hapus) satu tinggi: 40px. Tinggi yang sama membuat
+     tepi atas dan bawahnya segaris, dan baris tabel tidak membengkak. Di layar sentuh tingginya
+     naik ke 48px (lihat bagian bawah berkas ini).
+   - Tombol di dalam baris berbentuk sama dengan kolom isian di sebelahnya (radius 12px), bukan pil.
+     Pil penuh tetap dipakai untuk penyaring status, karena itu pilihan yang bisa dipilih-lepas,
+     bukan aksi pada satu baris.
+   - Total harga dibuat paling besar di barisnya, karena itu angka yang diputuskan admin.
+   - Aksi yang selesai (Tersimpan, Dihapus) tampil sebagai pita hijau di bawah navbar dan hilang
+     sendiri setelah 5 detik. Hijau dipilih karena itu tanda "selesai" yang paling cepat dibaca,
+     dan hanya dipakai untuk itu. Latar hijau tua dengan teks putih (kontras sekitar 7:1), tanpa
+     bayangan. Pita muncul dan hilang tanpa transisi. Satu-satunya gerak adalah garis di dasar pita
+     yang memendek selama 5 detik: ia menjawab satu pertanyaan, "kapan ini hilang?", dan berhenti
+     sendiri saat waktunya habis. Tidak tampil kalau pengguna meminta gerak dikurangi.
+   - Aksi yang gagal tetap sebagai baris di bawah baris yang salah, karena pesannya harus bertahan
+     sampai admin memperbaikinya. */
+
+.admin-page {
+  width: min(var(--lebar-halaman), calc(100% - 48px));
+  margin: 0 auto;
+  padding: 48px 0 96px;
+}
+
+.admin-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.admin-count {
+  min-width: 160px;
+  padding: 16px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.admin-count span { display: block; color: var(--mute); font-size: var(--t-kecil); }
+.admin-count strong {
+  display: block;
+  font-size: var(--t-sedang);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.admin-panel {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+}
+
+.panel-heading { padding: 24px; border-bottom: 1px solid var(--line); }
+
+/* Judul dan alat saring/cari satu kelompok: tanpa garis di antaranya, satu garis di bawah keduanya.
+   Dua pita bergaris berturut-turut memecah satu kelompok jadi dua wilayah. */
+.panel-heading:has(+ .alat-admin) { padding-bottom: 8px; border-bottom: 0; }
+
+.tabel-scroll { overflow-x: auto; width: 100%; }
+
+.tabel-admin {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tabel-admin th {
+  padding: 16px;
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabel-admin th:first-child,
+.tabel-admin td:first-child { padding-left: 24px; }
+
+.tabel-admin td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--t-isi);
+  vertical-align: middle;
+}
+.tabel-admin tbody tr:last-child td { border-bottom: 0; }
+
+/* tautan anchor dari redirect tidak boleh tertutup navbar yang menempel di atas */
+.tabel-admin tr[id] { scroll-margin-top: calc(var(--nav-h) + 24px); }
+
+.identitas-pesanan,
+.info-layanan,
+.sel-berat,
+.sel-status { display: flex; flex-direction: column; gap: 4px; }
+.ket-status { max-width: 220px; color: var(--mute); font-size: var(--t-kecil); line-height: 1.4; }
+
+.identitas-pesanan strong,
+.info-layanan strong { font-size: var(--t-isi); font-weight: 600; }
+.identitas-pesanan span,
+.info-layanan span { color: var(--mute); font-size: var(--t-kecil); }
+
+/* pesanan yang sudah selesai mundur ke belakang, yang masih jalan tetap jelas */
+.tabel-admin tr[data-status="selesai"] .identitas-pesanan strong,
+.tabel-admin tr[data-status="selesai"] .info-layanan strong { color: var(--mute); font-weight: 500; }
+
+.input-berat { display: flex; align-items: center; gap: 8px; }
+.input-berat span { color: var(--mute); font-size: var(--t-kecil); }
+.belum-ditimbang { color: var(--mute); font-size: var(--t-kecil); }
+
+.input-berat input,
+.tabel-admin select {
+  height: 40px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.input-berat input { width: 96px; padding: 0 12px; }
+.tabel-admin select { width: 216px; padding: 0 12px; }
+
+.input-berat input:hover,
+.tabel-admin select:hover { border-color: var(--mute); }
+
+.input-berat input:focus-visible,
+.tabel-admin select:focus-visible {
+  border-color: var(--brand);
+  outline: 2px solid var(--brand);
+  outline-offset: 0;
+}
+
+.input-berat input[aria-invalid="true"],
+.tabel-admin select[aria-invalid="true"] { border-color: var(--err-ink); }
+
+.harga-hasil strong {
+  font-size: var(--t-sedang);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Kolom angka rata kanan: satuan, ribuan, dan jutaan jatuh di garis tegak yang sama, jadi admin
+   membandingkan total antar baris tanpa membaca ulang tiap angka. Judul kolomnya ikut rata kanan. */
+.tabel-admin th:nth-child(4),
+.tabel-admin td:nth-child(4) { text-align: right; }
+
+/* ---------- saring dan cari ----------
+   Admin dengan puluhan pesanan perlu sampai ke satu pesanan tanpa menggulir. Tombol status menunjukkan jumlahnya,
+   kolom cari mencocokkan nama, nomor telepon, nomor pesanan, dan layanan. */
+
+.alat-admin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.saring { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.saring-tombol {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t-isi);
+  font-weight: 500;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.saring-tombol span { margin-left: 8px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.saring-tombol:hover { border-color: var(--mute); background: var(--bg); }
+.saring-tombol[aria-pressed="true"] {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+.saring-tombol[aria-pressed="true"] span { color: var(--brand-strong); }
+
+.cari-pesanan input {
+  width: 400px;
+  max-width: 100%;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.cari-pesanan input:hover { border-color: var(--mute); }
+.cari-pesanan input:focus-visible { border-color: var(--brand); outline: 2px solid var(--brand); outline-offset: 0; }
+
+.hasil-saring {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+.hasil-saring[hidden] { display: none; }
+.hasil-saring p { margin: 0; }
+
+/* ---------- aksi per baris: navy untuk simpan, merah untuk hapus ----------
+   Simpan dan Hapus selebar sama (96px) dan setinggi kolom isian di sebelahnya (40px), jadi
+   keduanya terbaca sebagai pasangan yang seimbang, bukan satu tombol besar dan satu kecil.
+   Simpan terisi karena itu aksi yang dipakai di tiap baris. Hapus hanya bergaris tipis dan
+   berisi saat disentuh: aksi yang tidak bisa dibalik tidak perlu berteriak di sembilan baris,
+   dan konfirmasinya sudah ada di dialog. Jarak 12px menjaga keduanya tetap satu kelompok
+   tetapi cukup jauh untuk tidak tertekan bersamaan. */
+.aksi-pesanan { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.aksi-pesanan form { margin: 0; }
+
+.tombol-simpan,
+.tombol-hapus,
+.tombol-batal {
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  font: inherit;
+  font-size: var(--t-isi);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+/* Dialog memakai tombol yang sama, semuanya 48px. */
+.tombol-simpan,
+.tombol-hapus,
+.tombol-batal { min-height: 48px; padding: 0 20px; }
+.tombol-simpan { font-weight: 600; }
+.tombol-hapus,
+.tombol-batal { font-weight: 500; }
+
+.aksi-pesanan .tombol-simpan,
+.aksi-pesanan .tombol-hapus {
+  width: 96px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--r-md);
+}
+
+.tombol-simpan { background: var(--brand); color: #fff; }
+.tombol-simpan:hover { background: var(--brand-strong); }
+
+.tombol-hapus {
+  border-color: var(--err-line);
+  background: var(--surface);
+  color: var(--err-ink);
+}
+.tombol-hapus:hover { border-color: var(--err-ink); background: var(--err-bg); }
+
+/* di dalam baris, Hapus tanpa garis sampai disentuh */
+.aksi-pesanan .tombol-hapus { border-color: transparent; background: none; }
+.aksi-pesanan .tombol-hapus:hover { border-color: var(--err-line); background: var(--err-bg); }
+
+.tombol-batal {
+  border-color: var(--line-input);
+  background: var(--surface);
+  color: var(--ink);
+}
+.tombol-batal:hover { border-color: var(--mute); background: var(--bg); }
+
+.tombol-simpan:active,
+.tombol-hapus:active,
+.tombol-batal:active { transform: translateY(1px); }
+
+/* layar sentuh: sasaran sentuh 48px (materi Layout), jadi semua kontrol di baris ikut naik */
+@media (pointer: coarse) {
+  .input-berat input,
+  .tabel-admin select,
+  .saring-tombol,
+  .cari-pesanan input,
+  .aksi-pesanan .tombol-simpan,
+  .aksi-pesanan .tombol-hapus { min-height: 48px; height: 48px; }
+}
+
+/* sedang diproses: tombol dikunci supaya tidak terkirim dua kali */
+.tombol-simpan:disabled,
+.tombol-hapus:disabled { opacity: 0.6; transform: none; }
+
+/* ---------- notifikasi aksi selesai: pita hijau di atas halaman ----------
+   Menempel di atas isi halaman (di bawah bilah atas pada layar kecil) supaya selalu terlihat walau halaman
+   sudah digulir ke baris yang diubah. Baris yang diubah ikut diberi latar sampai pita hilang. */
+
+.notifikasi {
+  position: fixed;
+  top: calc(var(--nav-h) + 16px);
+  /* tengah kolom isi: dengan navigasi di kiri, tengah layar bukan tengah halaman */
+  left: calc(50% + var(--sidebar-w) / 2);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(640px, calc(100% - 32px));
+  padding: 16px 8px 16px 24px;
+  border-radius: var(--r-lg);
+  background: var(--ok-bg);
+  color: var(--ok-ink);
+  overflow: hidden;
+  transform: translateX(-50%);
+}
+.notifikasi p { margin: 0; }
+.notifikasi-judul { font-weight: 650; }
+.notifikasi-isi { margin-top: 4px; font-size: var(--t-kecil); }
+
+.notifikasi-tutup {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--t-kecil);
+  font-weight: 500;
+  text-decoration: underline;
+}
+/* Lamanya (--waktu) diisi admin.js dari konstanta yang sama dengan timer, jadi garis dan pita selalu habis bersamaan.
+   Selama kursor atau fokus ada di pita, garis kembali penuh dan menunggu (.berhenti), lalu mulai lagi dari awal. */
+.notifikasi-garis {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.75);
+  transform-origin: left center;
+  animation: notifikasi-surut var(--waktu, 5000ms) linear forwards;
+}
+.notifikasi.berhenti .notifikasi-garis { animation: none; }
+
+@keyframes notifikasi-surut {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+.notifikasi-tutup:hover { background: rgba(255, 255, 255, 0.16); }
+.notifikasi-tutup:focus-visible { outline: 2px solid var(--ok-ink); outline-offset: 2px; }
+
+.baris-baru > td { background: var(--brand-tint); border-bottom-color: transparent; }
+
+/* ---------- pesan gagal: baris di bawah baris yang salah ---------- */
+
+.baris-galat > td { background: var(--err-bg); border-bottom-color: transparent; }
+
+.hasil-aksi > td {
+  padding: 0 24px 16px;
+  background: var(--err-bg);
+  border-bottom: 1px solid var(--line);
+}
+.hasil-aksi:last-child > td { border-bottom: 0; }
+
+.hasil {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 880px;
+}
+.hasil p,
+.hasil ul { margin: 0; }
+.hasil-judul { font-weight: 650; }
+.hasil-isi { margin-top: 4px; }
+.hasil ul { margin-top: 4px; padding-left: 24px; }
+.hasil-judul { color: var(--err-ink); }
+
+.hasil-tutup {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--err-ink);
+  font: inherit;
+  font-size: var(--t-kecil);
+  font-weight: 500;
+  text-decoration: underline;
+}
+.hasil-tutup:hover { background: var(--err-line); }
+
+/* ---------- keadaan kosong ---------- */
+
+.kosong-admin { padding: 56px 24px; text-align: center; }
+.kosong-admin strong { display: block; margin-bottom: 4px; font-size: var(--t-sedang); }
+.kosong-admin p { margin: 0 0 16px; color: var(--mute); }
+.kosong-admin a { color: var(--brand); font-weight: 600; }
+.kosong-admin a:hover { color: var(--brand-strong); }
+
+/* ---------- dialog hapus ---------- */
+
+.dialog-hapus {
+  width: min(480px, calc(100% - 32px));
+  margin: auto;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  color: var(--ink);
+}
+.dialog-hapus::backdrop { background: rgba(15, 27, 45, 0.55); }
+
+.dialog-hapus h2 { margin-bottom: 8px; font-size: var(--t-sedang); }
+.dialog-hapus p { color: var(--mute); }
+.dialog-hapus .dialog-rincian { margin-top: 16px; color: var(--ink); font-weight: 600; }
+
+.dialog-aksi {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+.dialog-aksi form { display: contents; }
+
+.tombol-hapus-final {
+  min-height: 48px;
+  padding: 0 24px;
+  font-weight: 600;
+  background: var(--err-ink);
+  border-color: var(--err-ink);
+  color: #fff;
+}
+.tombol-hapus-final:hover { background: var(--err-strong); border-color: var(--err-strong); }
+
+@media (max-width: 720px) {
+  .admin-page { width: calc(100% - 32px); padding-top: 32px; }
+  .admin-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
+  .panel-heading { padding: 16px; }
+  .tabel-admin th:first-child,
+  .tabel-admin td:first-child { padding-left: 16px; }
+  .hasil-aksi > td { padding: 0 16px 16px; }
+  .alat-admin,
+  .hasil-saring { padding: 16px; }
+  .cari-pesanan { width: 100%; }
+  .cari-pesanan input { width: 100%; }
+  .notifikasi { padding-left: 16px; }
+  .dialog-hapus { padding: 24px; }
+  .dialog-aksi .tombol-batal,
+  .dialog-aksi .tombol-hapus-final { flex: 1 1 140px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notifikasi-garis { display: none; }
+  .saring-tombol { transition: none; }
+  .tombol-simpan,
+  .tombol-hapus,
+  .tombol-batal { transition: none; }
+  .tombol-simpan:active,
+  .tombol-hapus:active,
+  .tombol-batal:active { transform: none; }
+}
+
+/* ---------- halaman audit ---------- */
+
+.keterangan-audit { margin: 4px 0 0; color: var(--mute); }
+.tabel-audit td { vertical-align: top; }
+.tabel-audit time { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tabel-audit strong,
+.tabel-audit .rincian { display: block; }
+.tabel-audit .rincian { color: var(--mute); font-size: var(--t-kecil); overflow-wrap: anywhere; }
+
+.halaman-audit {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+}
+.halaman-audit a:only-child { margin-left: auto; }
+
+/* ---------- pembayaran: info di kiri, aksi di kanan ----------
+   Sebelumnya status, nominal, dan tombol ditumpuk dalam satu lajur dengan jarak 4px, dan tombol
+   pembatalan berupa teks tanpa garis yang digeser -12px. Hasilnya tombol terbaca sebagai label
+   mengambang, dan jarak antar-isinya terlalu rapat untuk dipindai.
+   Sekarang sel ini dua wilayah dengan satu garis pemisah:
+   - kiri: fakta yang dibaca, status di atas nominal (dua hal yang selalu dibaca bersama);
+   - kanan: aksi, selalu tombol bergaris 40px setinggi kontrol lain di baris. Tandai lunas terisi
+     karena aksi yang paling sering; pembatalan hanya bergaris, supaya tidak menyaingi Simpan.
+   Garis pemisah memberi tahu mata bahwa kiri itu informasi dan kanan itu tombol, tanpa warna tambahan.
+   Status "menunggu verifikasi" punya dua tombol, jadi tombol bertumpuk di lajur kanan dan hanya
+   baris itu yang lebih tinggi. "dengan ongkir" ditulis sekali di judul kolom. */
+/* min-width info-bayar 112px: garis pemisah jatuh di titik yang sama pada status Lunas dan Belum bayar */
+.sel-bayar { display: flex; align-items: center; gap: 16px; }
+.info-bayar { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 112px; }
+.aksi-bayar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 1px solid var(--line);
+}
+.aksi-bayar form { margin: 0; }
+.ket-kolom { margin-left: 4px; color: var(--mute); font-weight: 400; }
+.label-bayar {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-pill);
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.label-bayar[data-bayar="menunggu_verifikasi"] { border-color: var(--cta); color: var(--cta-strong); }
+.label-bayar[data-bayar="lunas"] { border-color: transparent; background: var(--brand-tint); color: var(--brand-strong); }
+.nominal-bayar { color: var(--ink); font-size: var(--t-kecil); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tombol-bayar-admin {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tombol-bayar-admin:hover { border-color: var(--mute); background: var(--bg); }
+.tombol-bayar-admin.utama { border-color: var(--brand); background: var(--brand); color: #fff; }
+.tombol-bayar-admin.utama:hover { border-color: var(--brand-strong); background: var(--brand-strong); }
+/* Batalkan lunas: membatalkan pembayaran yang sudah tercatat, jadi merah bergaris seperti "Ada masalah" di sisi pelanggan. */
+.tombol-bayar-admin.bahaya { border-color: var(--err-ink); color: var(--err-ink); }
+.tombol-bayar-admin.bahaya:hover { border-color: var(--err-strong); background: var(--err-bg); color: var(--err-strong); }
+.tombol-bayar-admin:disabled { opacity: 0.6; }
+@media (pointer: coarse) { .tombol-bayar-admin { min-height: 48px; } }
+
+/* ---------- komplain pelanggan ----------
+   Satu komplain = satu blok dalam daftar bergaris (bukan kartu di dalam panel): siapa dan di pesanan mana,
+   isi laporannya, lalu kolom tanggapan dan status di bawahnya. Urutan baca sama dengan urutan kerja admin:
+   baca laporan, tulis jawaban, ubah status, simpan. Yang baru ada di atas. */
+
+/* tautan saringan memakai gaya tombol saring, dengan penanda halaman sedang dibuka */
+a.saring-tombol { display: inline-flex; align-items: center; text-decoration: none; }
+.saring-tombol[aria-current="true"] {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+.saring-tombol[aria-current="true"] span { color: var(--brand-strong); }
+
+.komplain-kosong { padding: 32px 24px; color: var(--mute); }
+
+.daftar-komplain { list-style: none; margin: 0; padding: 0; }
+.komplain-admin { padding: 24px; scroll-margin-top: 24px; }
+.komplain-admin + .komplain-admin { border-top: 1px solid var(--line); }
+
+.komplain-admin-kepala { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.komplain-admin-nama { font-size: var(--t-isi); font-weight: 650; }
+.komplain-admin-meta { margin-top: 2px; color: var(--mute); font-size: var(--t-kecil); }
+
+.komplain-admin-jenis { margin-top: 16px; font-weight: 600; }
+.komplain-admin-jenis span { margin-left: 12px; color: var(--mute); font-size: var(--t-kecil); font-weight: 400; }
+.komplain-admin-teks { max-width: 72ch; margin-top: 4px; overflow-wrap: anywhere; white-space: pre-line; }
+.komplain-admin-tautan { margin-top: 4px; }
+
+.komplain-admin-form { max-width: 72ch; margin-top: 16px; }
+.komplain-admin-form .grup-form { margin-bottom: 16px; }
+
+.komplain-admin-aksi { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.komplain-admin-status { display: flex; flex-direction: column; gap: 4px; }
+.komplain-admin-status label { color: var(--mute); font-size: var(--t-kecil); font-weight: 500; }
+.komplain-admin-status select {
+  width: 216px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.komplain-admin-status select:hover { border-color: var(--mute); }
+.komplain-admin-status select:focus-visible { border-color: var(--brand); outline: 2px solid var(--brand); outline-offset: 0; }
+.komplain-admin-status select[aria-invalid="true"] { border-color: var(--err-ink); }
+
+.komplain-admin-aksi .tombol-simpan { width: 96px; min-height: 40px; height: 40px; padding: 0; border-radius: var(--r-md); }
+
+.komplain-admin-jejak { margin-top: 12px; color: var(--mute); font-size: var(--t-kecil); }
+
+/* tautan ke komplain dari baris di Kelola pesanan: merah tua, satu-satunya tanda bahaya di baris itu */
+.tautan-komplain {
+  display: inline-block;
+  margin-top: 4px;
+  color: var(--err-ink);
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  text-decoration: none;
+}
+.tautan-komplain:hover { text-decoration: underline; }
+
+@media (max-width: 560px) {
+  .komplain-admin { padding: 16px; }
+  .komplain-admin-jenis span { display: block; margin: 2px 0 0; }
+  .komplain-admin-status,
+  .komplain-admin-status select { width: 100%; }
+  .komplain-admin-aksi { align-items: stretch; flex-direction: column; }
+  .komplain-admin-aksi .tombol-simpan { width: 100%; }
+}

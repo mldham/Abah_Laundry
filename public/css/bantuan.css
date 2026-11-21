@@ -1,0 +1,47 @@
+/* Halaman Bantuan. Warna, huruf, dan tombol ada di base.css.
+
+   Alasan keputusan desain:
+   - Satu kolom 720px seperti Cek pesanan: ini halaman baca, bukan alat kerja.
+   - Tanpa kartu: judul bagian dan garis tipis 1px sudah cukup memisahkan, sesuai DESIGN.md.
+   - Jarak antar bagian 48px, judul ke isi 16px, antar paragraf 16px (spesifikasi ukuran dan jarak). */
+
+.bantuan {
+  max-width: var(--lebar-baca);
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+.bantuan h1 { margin-bottom: 16px; }
+.pengantar { color: var(--mute); }
+
+.bantuan section { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+.bantuan h2 { margin-bottom: 16px; }
+.bantuan p + p { margin-top: 16px; }
+.bantuan a:not(.tombol) { color: var(--brand); font-weight: 600; }
+.bantuan a:not(.tombol):hover { color: var(--brand-strong); }
+
+.langkah { padding-left: 24px; }
+.langkah li + li { margin-top: 8px; }
+
+.daftar-status { display: grid; grid-template-columns: max-content 1fr; gap: 16px 32px; }
+.daftar-status dt { font-weight: 600; }
+.daftar-status dd { color: var(--mute); }
+
+.daftar-harga { margin-bottom: 16px; list-style: none; }
+.daftar-harga li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.daftar-harga li:first-child { border-top: 1px solid var(--line); }
+.daftar-harga strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.tombol-bantuan { margin-top: 16px; }
+
+@media (max-width: 560px) {
+  .bantuan { padding-top: 32px; }
+  .daftar-status { grid-template-columns: 1fr; gap: 4px; }
+  .daftar-status dd { margin-bottom: 16px; }
+}

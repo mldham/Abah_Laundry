@@ -1,0 +1,624 @@
+/* Dasar tampilan Laundry Abah. Dimuat di semua halaman lewat layouts/app.blade.php.
+   CSS per halaman (order, status, auth, admin) hanya berisi yang khusus halaman itu.
+
+   Alasan keputusan desain:
+   - Skema warna komplementer (materi UI Design, bagian Color). Navy dari logo (#2b588d, hue 212°)
+     berpasangan dengan oranye di seberangnya pada roda warna (hue 32°). Distribusi 60-30-10:
+     netral 60% (latar dan kartu putih), navy 30% (navbar, judul, kepala tabel, penanda pilihan),
+     oranye 10% (satu tombol utama per halaman). Kontras dua hue yang berseberangan itulah yang
+     membuat tombol utama langsung terlihat. Oranye digeser dari hue 17° ke 32° supaya tidak
+     berdekatan dengan merah galat (hue 4°): "lakukan ini" dan "ada yang salah" tidak boleh mirip.
+     Tint (+putih), shade (+hitam), dan tone (+abu) dari navy yang sama dipakai untuk semua
+     variasi, tidak ada warna baru di CSS halaman.
+   - Radius: tombol pil penuh, kolom isian 12px, kartu 20px. Bentuk berbeda untuk fungsi berbeda.
+   - Navigasi di sisi kiri, tersusun vertikal (248px mulai layar 960px). Menu halaman di atas, menu pengelola
+     di tengah, akun di dasar: tiga kelompok dengan fungsi berbeda dipisah garis 1px. Menu selalu terlihat tanpa
+     digulir, dan isi halaman memakai sisa lebarnya. Di bawah 960px sisi kiri menjadi laci yang dibuka tombol
+     Menu, supaya isi tetap memakai lebar penuh ponsel. Tanpa JavaScript menu tampil sebagai daftar di bawah logo.
+   - Tanpa bayangan: pemisah memakai garis 1px, tidak ada elemen yang perlu terlihat melayang.
+   - Outfit dipilih karena bentuk hurufnya geometris dan bulat, selaras dengan logo dan tombol pil proyek ini.
+     Satu font variabel dimuat untuk bobot 400-700 (isi 400, menu 500, judul 600-700), jadi tidak ada berkas tambahan
+     per bobot. Cadangan: system-ui, supaya teks tetap terbaca selama font dimuat.
+   - Skala huruf: lima tingkat berbasis rem (14, 16, 20, 28, 36 px pada ukuran dasar browser).
+     Isi 16px supaya terbaca nyaman di layar kerja admin dan di ponsel. Lompatan 1,25x antar tingkat
+     membuat judul bagian beda jelas dari isi. Ukuran baru ditambah di sini, bukan di CSS halaman.
+   - Umpan balik aksi pelanggan (pesanan masuk) ditulis sebagai fakta di tempat aksi terjadi,
+     gayanya ada di bagian "kabar" di bawah. Pengecualian: kabar sukses admin (Tersimpan, Dihapus)
+     tampil sebagai pita hijau di bagian atas halaman dan hilang sendiri dalam 5 detik,
+     lihat .notifikasi di admin.css. Hijau hanya dipakai untuk itu: tanda "aksi selesai". */
+
+:root {
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --ink: #0f1b2d;
+  --mute: #566274;
+  --line: #e2e8f0;
+  /* batas kolom isian, tombol garis, dan penanda pilihan: 3:1 terhadap putih dan latar halaman,
+     supaya kontrol terbaca sebagai bentuk yang berdiri di atas latar */
+  --line-input: #7d8da3;
+  --placeholder: #6b7789;
+
+  /* navy: hue 212°. Dipakai 30% permukaan. */
+  --brand: #2b588d;
+  --brand-strong: #1f4570;   /* shade: hover, judul, garis navbar */
+  --brand-tint: #eef3f9;     /* tint: latar terpilih, kepala tabel */
+  --brand-tint-2: #d9e5f2;   /* tint kedua: teks sekunder di atas navy (5,7:1) */
+  --on-brand: #ffffff;       /* teks di atas navy: 7,3:1 */
+
+  /* oranye: hue 32°, seberang navy. Dipakai 10%, satu tombol utama per halaman.
+     Putih di atasnya 5,0:1, hover 7,1:1. */
+  --cta: #a55d09;
+  --cta-strong: #834a07;
+
+  --err-ink: #a1261d;
+  --err-strong: #82201a;
+  --err-bg: #fff4f2;
+  --err-line: #f2cfc9;
+
+  --ok-bg: #166534;
+  --ok-ink: #ffffff;
+
+  --r-sm: 10px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* Aturan rasio emas (materi Typography): isi x 1,618 = judul bagian, judul bagian x 1,618 = judul halaman.
+     Isi 16px, judul bagian 25,9px, judul halaman 41,9px. Di ponsel keduanya mengecil sampai batas bawah
+     supaya "Pilih layanan" tidak patah baris. Tingkat 14 dan 20 tetap untuk komponen (petunjuk, judul
+     kartu dan dialog, angka penting di tabel): di dalam komponen 26px terlalu besar untuk isi 16px. */
+  --t-kecil: 14px;
+  --t-isi: 16px;
+  --t-sedang: 20px;
+  --t-besar: clamp(1.375rem, 1rem + 1.5vw, 1.618rem);
+  --t-judul: clamp(1.75rem, 1rem + 4vw, 2.618rem);
+
+  /* Grid responsif (materi Layout): ponsel 4 kolom, tablet 8 kolom, desktop 12 kolom.
+     Jarak antar kolom (gutter) 16px di ponsel, 24px mulai tablet. */
+  --kolom: 4;
+  --gutter: 16px;
+
+  /* lebar isi halaman */
+  --lebar-halaman: 1280px;
+  --lebar-form: 800px;
+  --lebar-baca: 720px;
+  --lebar-auth: 480px;
+
+  /* tinggi bilah atas di layar kecil (logo 48px + 2x8px + garis 1px). Bernilai 0 saat navigasi ada di sisi
+     kiri, jadi offset gulir dan pita notifikasi ikut menyesuaikan. --sidebar-w 0 di bawah 960px. */
+  --nav-h: 65px;
+  --sidebar-w: 0px;
+  --font: "Outfit", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@media (min-width: 600px) {
+  :root { --kolom: 8; --gutter: 24px; }
+}
+@media (min-width: 1024px) {
+  :root { --kolom: 12; }
+}
+
+html { font-size: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+* { margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--t-isi);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+a, button, label[for], select, summary { cursor: pointer; }
+:disabled { cursor: not-allowed; }
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+/* Judul memakai navy (30%) dan huruf besar rasio emas, isi tetap ink 16px. Dua perbedaan sekaligus
+   (ukuran dan warna) membuat judul jadi titik mulai mata di setiap halaman. */
+h1 { color: var(--brand-strong); font-size: var(--t-judul); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+h2 { color: var(--brand-strong); font-size: var(--t-besar); font-weight: 650; letter-spacing: -0.01em; line-height: 1.3; }
+
+/* judul di dalam komponen (kartu, dialog) satu tingkat di bawah judul bagian */
+.dialog h2 { font-size: var(--t-sedang); }
+
+.sr,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- navbar ----------
+   Layar kecil (di bawah 960px): bilah atas berisi logo dan tombol Menu, daftar menu keluar dari sisi kiri
+   sebagai laci. Tanpa JavaScript (tanpa data-drawer) tombol tersembunyi dan menu tampil sebagai daftar
+   vertikal di bawah logo, jadi navigasi tidak pernah hilang. Layar lebar: sisi kiri tetap, lihat bawah. */
+
+.navbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding: 8px 16px;
+  background: var(--brand);
+  border-bottom: 1px solid var(--brand);
+}
+
+.navbar[data-drawer] {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  flex-wrap: nowrap;
+  min-height: var(--nav-h);
+}
+
+/* Navy penuh: bagian terbesar dari 30% navy ada di sini. Latar logo (#2b588d) sama persis
+   dengan navbar, jadi tanda putihnya terlihat berdiri di atas bar tanpa kotak di sekelilingnya.
+   Teks putih 7,3:1, teks sekunder 5,7:1. Cincin fokus putih karena cincin navy hilang di atas navy. */
+.navbar :focus-visible { outline-color: var(--on-brand); }
+
+.navbar .merek {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  gap: 16px;
+  color: var(--on-brand);
+  font-size: var(--t-sedang);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  border-radius: var(--r-sm);
+}
+.navbar .merek img { border-radius: var(--r-sm); }
+.navbar .merek .teks span { color: var(--brand-tint-2); }
+
+/* tombol Menu: garis putih seperti tombol Daftar, tidak bersaing dengan oranye. Hanya ada kalau JavaScript jalan. */
+.navbar .tombol-menu {
+  position: relative;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--on-brand);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--on-brand);
+  font: inherit;
+  font-size: var(--t-isi);
+  font-weight: 600;
+}
+.navbar .tombol-menu[hidden] { display: none; }
+.navbar .tombol-menu:hover { background: var(--on-brand); color: var(--brand-strong); }
+
+.navbar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 8px 0 16px;
+}
+
+/* laci: menu keluar dari kiri, latar halaman menggelap di belakangnya. Tertutup memakai visibility
+   supaya tautan di dalamnya tidak bisa difokus lewat keyboard. Gerak masuknya ada di motion.css. */
+.navbar[data-drawer] nav {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 2;
+  width: min(300px, 86vw);
+  padding: 24px 16px;
+  overflow-y: auto;
+  background: var(--brand);
+  visibility: hidden;
+  transform: translateX(-100%);
+}
+.navbar[data-drawer][data-buka] nav { visibility: visible; transform: none; }
+
+.navbar[data-drawer][data-buka]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(15, 27, 45, 0.55);
+}
+
+.navbar nav a,
+.navbar .tautan-keluar {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--brand-tint-2);
+  font: inherit;
+  font-size: var(--t-isi);
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.navbar nav a:hover,
+.navbar .tautan-keluar:hover {
+  background: var(--brand-strong);
+  color: var(--on-brand);
+}
+
+/* halaman yang sedang dibuka: pil putih terisi, satu-satunya elemen putih terisi di navbar */
+.navbar nav a.aktif {
+  background: var(--on-brand);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+
+/* satu tombol di navbar: ajakan untuk membuat akun, garis putih supaya tidak bersaing dengan oranye */
+.navbar nav a.tombol-nav {
+  border-color: var(--on-brand);
+  color: var(--on-brand);
+  font-weight: 600;
+}
+.navbar nav a.tombol-nav:hover,
+.navbar nav a.tombol-nav.aktif { background: var(--on-brand); color: var(--brand-strong); }
+
+.navbar form { display: block; width: 100%; }
+
+/* Tiga kelompok dengan fungsi berbeda: menu halaman (Order, Cek pesanan, Bantuan), menu pengelola
+   (Kelola pesanan, Audit), dan akun (Masuk, Daftar, atau nama dan Keluar). Garis 1px memisahkan
+   kelompok, jarak dalam kelompok tetap 4px. Akun turun ke dasar sisi kiri. */
+.navbar .menu-admin,
+.navbar .menu-akun {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--on-brand) 35%, var(--brand));
+}
+.navbar .menu-akun { margin-top: auto; }
+
+.navbar .akun-nama {
+  padding: 8px 16px;
+  overflow: hidden;
+  color: var(--on-brand);
+  font-size: var(--t-isi);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Layar lebar: navbar menjadi sisi kiri setinggi layar yang menempel saat halaman digulir. Hanya logo dan
+   menu yang ada di dalamnya, isi halaman di sebelah kanan (.halaman) memakai sisa lebar. */
+@media (min-width: 960px) {
+  :root { --nav-h: 0px; --sidebar-w: 248px; }
+
+  body { display: flex; align-items: flex-start; }
+
+  .navbar,
+  .navbar[data-drawer] {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex: 0 0 var(--sidebar-w);
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 32px;
+    width: var(--sidebar-w);
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding: 24px 16px;
+    overflow-y: auto;
+    border-bottom: 0;
+  }
+
+  .navbar .tombol-menu,
+  .navbar .tombol-menu[hidden] { display: none; }
+
+  .navbar nav,
+  .navbar[data-drawer] nav {
+    position: static;
+    flex: 1;
+    width: auto;
+    padding: 0;
+    overflow: visible;
+    visibility: visible;
+    transform: none;
+  }
+
+  .navbar[data-drawer][data-buka]::after { display: none; }
+
+  .halaman { flex: 1; min-width: 0; }
+}
+
+/* ---------- tombol ---------- */
+
+.tombol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: #fff;
+  font: inherit;
+  font-size: var(--t-isi);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.tombol:hover { background: var(--brand-strong); }
+.tombol:active { transform: translateY(1px); }
+.tombol:disabled { opacity: 0.5; transform: none; }
+
+/* aksi utama halaman: satu per halaman */
+.tombol-utama {
+  background: var(--cta);
+}
+.tombol-utama:hover { background: var(--cta-strong); }
+
+.tombol-blok { width: 100%; }
+
+/* ---------- kabar: umpan balik setelah aksi ----------
+   Fakta ditulis tebal di baris pertama, rincian di bawahnya. Dua garis tipis sebagai batas,
+   tanpa kotak berwarna, supaya tidak bersaing dengan satu tombol utama di halaman.
+   Varian .kabar-kartu dipakai di dalam kartu pesanan, .kabar-galat untuk yang gagal. */
+
+.kabar {
+  margin: 0 0 24px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.kabar-judul { font-size: var(--t-isi); font-weight: 650; }
+.kabar-isi { margin-top: 4px; color: var(--mute); }
+.kabar-galat .kabar-judul { color: var(--err-ink); }
+.kabar ul { margin-top: 8px; padding-left: 24px; }
+
+.kabar-galat a { color: var(--err-ink); font-weight: 500; text-decoration: underline; }
+.kabar-galat:focus { outline: 2px solid var(--err-ink); outline-offset: 4px; }
+
+.kabar-kartu {
+  margin: calc(var(--pad-kartu, 32px) * -1) calc(var(--pad-kartu, 32px) * -1) 24px;
+  padding: 16px var(--pad-kartu, 32px);
+  border: 0;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+/* galat di bawah kolom isian */
+.galat {
+  margin: 8px 0 0;
+  color: var(--err-ink);
+  font-size: var(--t-kecil);
+  font-weight: 500;
+}
+
+/* ---------- tombol tambahan: garis (sekunder, 48px) dan bahaya (merah) ----------
+   Mengikuti materi Layout (sasaran sentuh minimal 48dp): sedang 48px, isi 20px, medium. Bahaya terisi hanya di dalam dialog konfirmasi (48px). */
+
+.tombol-garis,
+.tombol-bahaya-isi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  font: inherit;
+  font-size: var(--t-isi);
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.tombol-garis {
+  min-height: 48px;
+  padding: 0 20px;
+  border-color: var(--line-input);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 500;
+}
+.tombol-garis:hover { border-color: var(--mute); background: var(--bg); }
+
+.tombol-bahaya { border-color: var(--err-line); color: var(--err-ink); }
+.tombol-bahaya:hover { border-color: var(--err-ink); background: var(--err-bg); }
+
+/* Ada masalah: merah bergaris, teks dan garis sama-sama merah (kontras teks 7:1 di atas putih). Tidak
+   terisi, supaya tidak bersaing dengan satu tombol utama oranye di kartu yang sama. */
+.tombol-masalah { border-color: var(--err-ink); color: var(--err-ink); }
+.tombol-masalah:hover { border-color: var(--err-strong); background: var(--err-bg); color: var(--err-strong); }
+.tautan-struk.tautan-masalah { color: var(--err-ink); }
+.tautan-struk.tautan-masalah:hover { color: var(--err-strong); }
+
+.tombol-bahaya-isi {
+  min-height: 48px;
+  padding: 0 24px;
+  background: var(--err-ink);
+  color: #fff;
+  font-weight: 600;
+}
+.tombol-bahaya-isi:hover { background: var(--err-strong); }
+
+.tombol-garis:active,
+.tombol-bahaya-isi:active { transform: translateY(1px); }
+.tombol-garis:disabled,
+.tombol-bahaya-isi:disabled { opacity: 0.6; transform: none; }
+
+/* ---------- dialog konfirmasi (dipakai Cek pesanan) ---------- */
+
+.dialog {
+  width: min(480px, calc(100% - 32px));
+  margin: auto;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  color: var(--ink);
+}
+.dialog::backdrop { background: rgba(15, 27, 45, 0.55); }
+.dialog h2 { margin-bottom: 8px; }
+.dialog p { color: var(--mute); }
+.dialog p + p { margin-top: 16px; }
+.dialog .dialog-rincian { color: var(--ink); font-weight: 600; }
+.dialog-aksi {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* ---------- halaman galat (404, 419, 429, 500, 503) ---------- */
+
+.halaman-galat {
+  max-width: var(--lebar-auth);
+  margin: 0 auto;
+  padding: 64px 24px 96px;
+}
+.halaman-galat h1 { margin-bottom: 16px; }
+.halaman-galat p { margin-bottom: 24px; color: var(--mute); }
+
+/* ---------- isian form (dipakai order dan auth) ---------- */
+
+.opsional { color: var(--mute); font-size: var(--t-kecil); font-weight: 400; }
+
+/* petunjuk di bawah kolom isian */
+.petunjuk { margin-top: 8px; color: var(--mute); font-size: var(--t-kecil); }
+
+.grup-form,
+.grup { margin-bottom: 24px; }
+
+.grup-form label,
+.grup label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink);
+  font-size: var(--t-isi);
+  font-weight: 600;
+}
+
+.grup-form input,
+.grup-form textarea,
+.grup input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color 0.15s;
+}
+
+.grup-form textarea { height: auto; min-height: 96px; padding: 16px; resize: vertical; line-height: 1.5; }
+
+.grup-form input::placeholder,
+.grup-form textarea::placeholder,
+.grup input::placeholder { color: var(--placeholder); }
+
+.grup-form input:hover,
+.grup-form textarea:hover,
+.grup input:hover { border-color: var(--mute); }
+
+.grup-form input:focus-visible,
+.grup-form textarea:focus-visible,
+.grup input:focus-visible {
+  border-color: var(--brand);
+  outline: 2px solid var(--brand);
+  outline-offset: 0;
+}
+
+.grup input[aria-invalid="true"],
+.grup-form input[aria-invalid="true"],
+.grup-form textarea[aria-invalid="true"] { border-color: var(--err-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar nav a,
+  .navbar .tautan-keluar,
+  .tombol,
+  .tombol-garis,
+  .tombol-bahaya-isi,
+  .grup-form input,
+  .grup-form textarea,
+  .grup input { transition: none; }
+  .tombol:active,
+  .tombol-garis:active,
+  .tombol-bahaya-isi:active { transform: none; }
+}
+
+/* ---------- tautan ke struk (Cek pesanan dan Kelola pesanan) ----------
+   Tautan teks, bukan tombol: membuka dokumen, bukan mengubah pesanan. Tombol di baris tabel dan kartu
+   dipakai untuk aksi yang mengubah data, jadi struk tidak ikut bersaing dengannya. */
+.tautan-struk {
+  display: inline-block;
+  color: var(--brand);
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  text-decoration: none;
+}
+.tautan-struk:hover { color: var(--brand-strong); text-decoration: underline; }
+@media (pointer: coarse) {
+  .tautan-struk { padding: 12px 0; }
+}
+
+/* ---------- status komplain (Cek pesanan dan Komplain di admin) ----------
+   Baru = perlu perhatian (garis dan teks oranye tua, kontras 5:1 di atas putih). Sedang ditangani = biru muda
+   terisi. Selesai = abu-abu bergaris: sudah tidak menuntut apa pun. Tulisan statusnya selalu ada,
+   jadi warna tidak membawa makna sendirian. */
+.label-komplain {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--mute);
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.label-komplain[data-komplain="baru"] { border-color: var(--cta); color: var(--cta-strong); }
+.label-komplain[data-komplain="diproses"] { border-color: transparent; background: var(--brand-tint); color: var(--brand-strong); }
+
+/* angka komplain baru di menu admin */
+.navbar nav a .lencana {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin-left: auto;
+  padding: 0 8px;
+  border-radius: var(--r-pill);
+  background: var(--cta);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}

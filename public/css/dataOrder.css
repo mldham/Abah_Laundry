@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');  
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f5f7fb;
+  color: #222;
+}
+
+/* navbar*/
+
+.navbar {
+  height: 100px;
+  top: 0;
+  width: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  padding-left: 60px;
+  padding-right: 60px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  z-index: 100000;
+}
+
+.navbar img {
+  border-radius: 40px;
+}
+
+.navbar h2 {
+  padding-left: 20px;
+  font-size: 20pt;
+}
+
+.navbar nav {
+  display: flex;
+  gap: 30px;
+  margin-left: auto;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #555;
+  font-size: 15px;
+}
+
+.navbar a.aktif {
+  color: #0284c7;
+  font-weight: bold;
+}
+
+/*isi*/
+.data {
+    padding-bottom: 100px;
+    padding-top: 150px;
+    margin: auto;
+}
+
+.data h1 {
+  padding-bottom: 40px;
+}
+
+.data .tabel {
+  text-align: center;
+  justify-content: center;
+  display: flex;
+}
+
+table {
+    text-shadow: 1px 1px 0px #fff;
+    border: #ccc 1px solid;
+    text-align: center;
+    justify-content: center;
+}
+
+table th {
+    padding: 15px 35px;
+    border-left: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    background: #ededed;
+    text-align: center;
+}
+
+table th:first-child {
+    border-left: none;
+}
+
+table tr {
+    text-align: center;
+    padding-left: 20px;
+}
+
+table td:first-child {
+    text-align: left;
+    padding-left: 20px;
+    border-left: 0;
+}
+
+table td {
+    padding: 15px 35px;
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    border-left: 1px solid #e0e0e0;
+    background: #fafafa;
+    background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));
+    background: -moz-linear-gradient(top, #fbfbfb, #fafafa);
+}
+
+table tr:last-child td {
+    border-bottom: 0;
+}
+
+table tr:last-child td:first-child {
+    -moz-border-radius-bottomleft: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+
+table tr:last-child td:last-child {
+    -moz-border-radius-bottomright: 3px;
+    -webkit-border-bottom-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+table tr:hover td {
+    background: #f2f2f2;
+    background: -webkit-gradient(linear, left top, left bottom, from(#f2f2f2), to(#f0f0f0));
+    background: -moz-linear-gradient(top, #f2f2f2, #f0f0f0);
+}
+
+/* pesan sukses (ditambahkan saat migrasi ke Laravel) */
+.pesan-sukses {
+  background: #e8f5e9;
+  color: #1b5e20;
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin: 0 auto 20px;
+  max-width: 600px;
+  font-size: 14px;
+  text-align: center;
+}

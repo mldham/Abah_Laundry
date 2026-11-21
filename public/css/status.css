@@ -1,0 +1,163 @@
+/* Halaman Cek Pesanan. Warna, radius, dan pesan sukses ada di base.css. */
+
+.status {
+  max-width: var(--lebar-baca);
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+.status h1 { margin-bottom: 24px; }
+.status h2 { margin: 40px 0 16px; }
+
+/* ---------- pesanan terbaru ---------- */
+
+.pesanan {
+  --pad-kartu: 32px;
+  padding: var(--pad-kartu);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+}
+.pesanan h3 { font-size: var(--t-sedang); font-weight: 650; letter-spacing: -0.01em; line-height: 1.3; }
+.nomor { margin-top: 4px; color: var(--mute); }
+
+/* nama layanan di kiri, tautan struk di kanan, sejajar dengan baris pertama */
+.kepala-pesanan { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+
+/* tahap pesanan: gelembung dari logo yang tersambung garis, terisi sampai tahap sekarang */
+.tahap {
+  display: flex;
+  gap: 8px;
+  margin: 24px 0 16px;
+  list-style: none;
+}
+.tahap li {
+  position: relative;
+  flex: 1;
+  padding-top: 32px;
+  color: var(--mute);
+  font-size: var(--t-kecil);
+  line-height: 1.5;
+}
+.tahap li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line-input);
+  border-radius: 50%;
+  background: var(--surface);
+}
+.tahap li::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 24px;
+  right: -8px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.tahap li:last-child::after { display: none; }
+
+.tahap li.lewat { color: var(--ink); }
+.tahap li.lewat::before { border-color: var(--brand); background: var(--brand); }
+.tahap li.lewat::after { background: var(--brand); }
+
+.tahap li.sekarang {
+  color: var(--brand-strong);
+  font-weight: 650;
+}
+.tahap li.sekarang::before {
+  border-color: var(--brand);
+  background: var(--brand);
+  box-shadow: 0 0 0 4px var(--brand-tint-2);
+}
+
+/* Menjelaskan tahap sekarang, jadi 16px dari tahapan (24px dari garis rincian di bawahnya):
+   lebih dekat ke yang dijelaskan daripada ke yang tidak berhubungan. */
+.penjelasan-status { margin: 0 0 24px; color: var(--mute); }
+
+.form-batal { margin-top: 24px; }
+.tombol-bayar { margin-top: 24px; }
+
+/* Konfirmasi cucian diterima. Satu-satunya tombol yang dibutuhkan pelanggan di tahap diantar. */
+.form-terima { margin-top: 24px; }
+.riwayat .form-terima { flex-basis: 100%; margin-top: 0; }
+
+/* Aksi pesanan sebaris: konfirmasi terima, ada masalah, bayar. Jarak antar tombol 8px, turun ke baris
+   berikutnya kalau layar sempit. Margin atas milik pembungkusnya, bukan tiap tombol. */
+.aksi-kartu { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.aksi-kartu .form-terima,
+.aksi-kartu .tombol-bayar { margin-top: 0; }
+.aksi-kartu + .form-batal { margin-top: 8px; }
+
+/* ---------- komplain di kartu pesanan ----------
+   Satu blok untuk satu komplain: apa masalahnya, sudah sampai mana, dan jawaban admin. Latar abu-abu muda
+   dengan sudut membulat, tanpa garis warna di sisi, supaya terbaca sebagai bagian dari kartu pesanan. */
+.komplain-kartu {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+.riwayat .komplain-kartu { flex-basis: 100%; margin-top: 0; border: 1px solid var(--line); background: var(--surface); }
+.komplain-kepala { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.komplain-jenis { font-weight: 650; }
+.komplain-waktu { margin-top: 2px; color: var(--mute); font-size: var(--t-kecil); }
+.komplain-teks { margin-top: 12px; overflow-wrap: anywhere; white-space: pre-line; }
+.komplain-tanggapan { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); overflow-wrap: anywhere; white-space: pre-line; }
+.komplain-tanggapan > span { display: block; margin-bottom: 2px; color: var(--mute); font-size: var(--t-kecil); font-weight: 600; }
+.komplain-tunggu { margin-top: 12px; color: var(--mute); font-size: var(--t-kecil); }
+
+.rincian {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  align-items: baseline;
+  gap: 16px 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.rincian dt { color: var(--mute); }
+.rincian dd { font-weight: 600; }
+.rincian .total { font-size: var(--t-sedang); letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.belum { color: var(--mute); font-size: var(--t-isi); font-weight: 400; }
+
+/* ---------- pesanan sebelumnya: baris ringkas, bukan kartu ---------- */
+
+.riwayat { list-style: none; }
+.riwayat li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.riwayat li:first-child { border-top: 1px solid var(--line); }
+.riwayat .form-batal { flex-basis: 100%; margin-top: 0; }
+.riwayat small { display: block; color: var(--mute); font-size: var(--t-kecil); }
+.riwayat .tautan-baris { display: flex; flex-wrap: wrap; gap: 0 16px; }
+.riwayat strong { font-size: var(--t-isi); font-weight: 600; white-space: nowrap; }
+
+.kosong { max-width: 52ch; color: var(--mute); }
+.kosong a { color: var(--brand); font-weight: 600; }
+.kosong a:hover { color: var(--brand-strong); }
+
+@media (max-width: 560px) {
+  .status { padding-top: 32px; }
+
+  /* Lima tahap tidak muat berjajar di layar sempit, jadi turun ke bawah dengan garis tegak. */
+  .tahap { flex-direction: column; gap: 0; }
+  .tahap li { padding: 0 0 20px 32px; }
+  .tahap li:last-child { padding-bottom: 0; }
+  .tahap li::before { top: 3px; }
+  .tahap li::after { top: 22px; bottom: -2px; left: 7px; right: auto; width: 2px; height: auto; }
+  .pesanan { --pad-kartu: 24px; }
+  .rincian { grid-template-columns: 1fr; gap: 4px; }
+  .rincian dd { margin-bottom: 16px; }
+}

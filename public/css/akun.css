@@ -1,0 +1,46 @@
+
+.navbar nav { align-items: center; }
+
+.navbar nav a:hover,
+.navbar .tautan-keluar:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.navbar .akun-nama {
+  color: #222;
+  font-size: 15px;
+  font-weight: 600;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar form { display: inline; }
+
+.navbar .tautan-keluar {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #555;
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+.navbar .tautan-keluar:focus-visible { outline: 3px solid #222; outline-offset: 2px; }
+
+.atas-nama {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #cfe6f5;
+  border-radius: 11px;
+  background: #f0f8ff;
+  color: #222;
+  font-size: 14px;
+}
+
+@media (max-width: 800px) {
+  .navbar .tautan-keluar,
+  .navbar nav a { min-height: 44px; display: inline-flex; align-items: center; }
+}
