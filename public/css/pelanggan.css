@@ -1,0 +1,96 @@
+/* Halaman Data Pelanggan (daftar dan form). Warna, tombol, dan kolom isian ada di base.css. */
+
+.halaman-isi {
+  max-width: var(--lebar-halaman);
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+.halaman-isi.sempit { max-width: var(--lebar-form); }
+
+.halaman-isi > * { animation: masuk var(--gerak-masuk, 450ms) var(--ease-keluar, ease-out) backwards; }
+.halaman-isi > :nth-child(2) { animation-delay: 60ms; }
+.halaman-isi > :nth-child(3) { animation-delay: 120ms; }
+.halaman-isi > :nth-child(n + 4) { animation-delay: 180ms; }
+
+/* kepala halaman: judul dan satu tombol utama */
+.kepala {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: 32px;
+}
+.kepala .pengantar { max-width: var(--lebar-baca); margin-top: 8px; color: var(--mute); }
+
+.tombol-utama { padding: 0 28px; }
+
+/* pencarian */
+.cari {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.cari input {
+  flex: 1 1 260px;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.cari input::placeholder { color: var(--placeholder); }
+.cari input:hover { border-color: var(--mute); }
+.cari input:focus-visible { border-color: var(--brand); outline: 2px solid var(--brand); outline-offset: 0; }
+
+/* konfirmasi hapus: garis merah tipis, bukan kotak berwarna */
+.kabar-hapus .kabar-judul { color: var(--err-ink); }
+.kabar-hapus .dialog-aksi { justify-content: flex-start; margin-top: 16px; }
+/* base.css mewarnai semua tautan di .kabar-galat merah bergaris bawah; tombol Batal tetap tombol garis biasa */
+.kabar-hapus a.tombol-garis { color: var(--ink); font-weight: 500; text-decoration: none; }
+
+/* tabel */
+.tabel-bungkus {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.tabel-pelanggan { width: 100%; min-width: 820px; border-collapse: collapse; }
+.tabel-pelanggan th,
+.tabel-pelanggan td {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.tabel-pelanggan th {
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-size: var(--t-kecil);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.tabel-pelanggan tbody tr:last-child td { border-bottom: 0; }
+.tabel-pelanggan tbody tr:hover td { background: var(--bg); }
+.tabel-pelanggan .kode { color: var(--mute); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tabel-pelanggan .nama { font-weight: 600; }
+.tabel-pelanggan .telepon { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tabel-pelanggan .aksi { display: flex; flex-wrap: nowrap; gap: 8px; white-space: nowrap; }
+.tabel-pelanggan .kosong { padding: 48px 16px; color: var(--mute); text-align: center; }
+
+/* tombol di dalam baris: lebih ringkas, tetap 40px */
+.tombol-kecil { min-height: 40px; padding: 0 16px; font-size: var(--t-kecil); }
+
+/* form tambah / ubah */
+.form-pelanggan { max-width: var(--lebar-form); }
+.aksi-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.aksi-form .tombol,
+.aksi-form .tombol-garis { min-height: 56px; padding: 0 32px; }
+
+@media (max-width: 720px) {
+  .halaman-isi { padding-top: 32px; }
+}

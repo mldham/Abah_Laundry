@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Masuk admin')
+@section('judul', 'Masuk admin')
 
 @push('styles')
   <link rel="stylesheet" href="{{ asset('css/auth.css') }}" />
 @endpush
 
-@section('content')
+@section('isi')
 <main class="auth">
   <h1>Masuk admin</h1>
 

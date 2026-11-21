@@ -48,7 +48,7 @@ class AdminAuthController extends Controller
 
         LogAktivitas::catat('admin.masuk');
 
-        return redirect()->intended(route('admin.order.index'));
+        return redirect()->intended(route('pelanggan.index'));
     }
 
     public function keluar(Request $request): RedirectResponse

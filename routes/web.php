@@ -8,9 +8,26 @@ use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BantuanController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PelangganController;
 
-Route::get('/', function () {
-    return view('welcome');
+// Redirect halaman awal ke daftar pelanggan (akan diarahkan ke login admin jika belum masuk)
+Route::redirect('/', '/pelanggan')->name('beranda');
+
+// Route Pelanggan dilindungi middleware auth:admin & peran
+Route::middleware(['auth:admin', 'akun.aktif', 'tanpa-cache'])->group(function () {
+    // Admin dan Operator boleh lihat, tambah, dan edit pelanggan
+    Route::middleware('peran:admin,operator')->group(function () {
+        Route::get('/pelanggan', [PelangganController::class, 'index'])->name('pelanggan.index');
+        Route::get('/pelanggan/create', [PelangganController::class, 'create'])->name('pelanggan.create');
+        Route::post('/pelanggan', [PelangganController::class, 'store'])->name('pelanggan.store');
+        Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])->name('pelanggan.edit');
+        Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])->name('pelanggan.update');
+    });
+
+    // Khusus Admin yang boleh menghapus pelanggan
+    Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy'])
+        ->middleware('peran:admin')
+        ->name('pelanggan.destroy');
 });
 
 // Akun pelanggan. Percobaan masuk dan daftar dibatasi 6 kali per menit per alamat IP.
