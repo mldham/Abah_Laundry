@@ -37,7 +37,7 @@ class AdminAuthController extends Controller
         ]);
 
         if (! $berhasil) {
-            LogAktivitas::catat('admin.masuk_gagal', email: $data['email']);
+            //LogAktivitas::catat('admin.masuk_gagal', email: $data['email']);
 
             return back()
                 ->withInput($request->only('email'))
@@ -46,14 +46,14 @@ class AdminAuthController extends Controller
 
         $request->session()->regenerate();
 
-        LogAktivitas::catat('admin.masuk');
+       //LogAktivitas::catat('admin.masuk');
 
-        return redirect()->intended(route('admin.order.index'));
+        return redirect()->route('admin.mesin.index');
     }
 
     public function keluar(Request $request): RedirectResponse
     {
-        LogAktivitas::catat('admin.keluar');
+        //LogAktivitas::catat('admin.keluar');
 
         Auth::guard('admin')->logout();
         $request->session()->invalidate();

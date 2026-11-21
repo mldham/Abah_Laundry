@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminKomplainController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BantuanController;
+use App\Http\Controllers\MesinController;
 use App\Http\Controllers\OrderController;
 
 Route::get('/', function () {
@@ -32,6 +33,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['auth:admin', 'akun.aktif', 'tanpa-cache'])->group(function () {
         Route::post('/keluar', [AdminAuthController::class, 'keluar'])->name('keluar');
 
+        // Akses Admin & Operator (Tambah & Edit Mesin)
         Route::middleware('peran:admin,operator')->group(function () {
             Route::get('/order', [AdminOrderController::class, 'index'])->name('order.index');
             Route::get('/order/{pesanan}/struk', [AdminOrderController::class, 'struk'])->middleware('can:view,pesanan')->name('order.struk');
@@ -40,8 +42,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/komplain', [AdminKomplainController::class, 'index'])->name('komplain.index');
             Route::put('/komplain/{komplain}', [AdminKomplainController::class, 'update'])->name('komplain.update');
             Route::delete('/order/{pesanan}', [AdminOrderController::class, 'destroy'])->middleware('can:delete,pesanan')->name('order.destroy');
+
+            // Fitur Mesin & Peralatan (Lihat, Tambah, Edit)
+            Route::get('/mesin', [MesinController::class, 'index'])->name('mesin.index');
+            Route::post('/mesin', [MesinController::class, 'store'])->name('mesin.store');
+            Route::get('/mesin/{kode}/edit', [MesinController::class, 'edit'])->name('mesin.edit');
+            Route::put('/mesin/{kode}', [MesinController::class, 'update'])->name('mesin.update');
         });
 
-        Route::get('/audit', [AdminAuditController::class, 'index'])->middleware('peran:admin')->name('audit');
+        // Khusus Admin (Audit & Hapus Mesin)
+        Route::middleware('peran:admin')->group(function () {
+            Route::get('/audit', [AdminAuditController::class, 'index'])->name('audit');
+
+            // Fitur Mesin & Peralatan (Hapus)
+            Route::get('/mesin/{kode}/hapus', [MesinController::class, 'hapus'])->name('mesin.hapus');
+        });
     });
 });

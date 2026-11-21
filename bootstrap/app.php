@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\PastikanAkunAktif;
+use App\Http\Middleware\PastikanPeran;
+use App\Http\Middleware\TanpaCache;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,10 +15,20 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'akun.aktif'  => PastikanAkunAktif::class,
+            'peran'       => PastikanPeran::class,
+            'tanpa-cache' => TanpaCache::class,
+        ]);
+
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return route('admin.masuk');
+            }
+
+            return route('masuk');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
-        );
+        //
     })->create();
