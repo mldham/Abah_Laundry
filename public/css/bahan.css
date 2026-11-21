@@ -1,0 +1,351 @@
+/* Halaman Kelola stock (daftar, tambah, edit). Token warna, huruf, tombol, kolom isian, dialog,
+   dan navbar ada di base.css. Berkas ini hanya berisi komponen yang khusus untuk stok bahan. */
+
+.kelola {
+  max-width: var(--lebar-halaman);
+  margin: 0 auto;
+  padding: 48px 48px 96px;
+}
+
+/* ---------- kepala halaman ---------- */
+
+.admin-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-bottom: 32px;
+}
+.subjudul {
+  margin-top: 8px;
+  color: var(--mute);
+}
+
+.ringkasan {
+  min-width: 160px;
+  padding: 16px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+}
+.ringkasan-label {
+  color: var(--mute);
+  font-size: var(--t-kecil);
+  font-weight: 500;
+}
+.ringkasan-nilai {
+  margin-top: 2px;
+  color: var(--brand-strong);
+  font-size: var(--t-sedang);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- panel ---------- */
+
+.panel {
+  position: relative;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+}
+.panel > h2 {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-bottom: 24px;
+}
+.panel-form {
+  max-width: var(--lebar-form);
+}
+
+/* ---------- toolbar: filter kategori, cari, tambah ---------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.toolbar-kanan {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Posisikan tombol "+ Tambah bahan" sejajar dengan judul "Daftar bahan pembersih" di pojok kanan atas panel */
+@media (min-width: 600px) {
+  .panel > h2 {
+    padding-right: 200px;
+  }
+  .toolbar-kanan .tombol {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+  }
+}
+
+.pil {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--t-isi);
+  font-weight: 500;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.pil:hover {
+  border-color: var(--mute);
+  background: var(--bg);
+}
+.pil[aria-pressed="true"] {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+  font-weight: 600;
+}
+.pil .jumlah {
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.pil[aria-pressed="true"] .jumlah {
+  color: var(--brand-strong);
+}
+
+.cari {
+  width: min(320px, 100%);
+  height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  outline: 2px solid transparent;
+  transition:
+    border-color 0.15s,
+    outline-color 0.25s;
+}
+.cari::placeholder {
+  color: var(--placeholder);
+}
+.cari:hover {
+  border-color: var(--mute);
+}
+.cari:focus-visible {
+  border-color: var(--brand);
+  outline-color: var(--brand);
+}
+
+/* ---------- tabel ---------- */
+
+.tabel-bungkus {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+thead tr {
+  background: var(--brand-tint);
+}
+th {
+  padding: 14px 16px;
+  color: var(--brand-strong);
+  font-size: var(--t-kecil);
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+th:first-child {
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
+}
+th:last-child {
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+tbody tr:hover {
+  background: var(--bg);
+}
+
+.nama-barang {
+  color: var(--ink);
+  font-weight: 600;
+}
+.kode {
+  margin-top: 2px;
+  color: var(--mute);
+  font-size: var(--t-kecil);
+}
+
+.label-kategori,
+.label-menipis {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-kecil);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.label-kategori {
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+/* Stok menipis ditandai warna dan tulisan, jadi warna tidak membawa makna sendirian. */
+.stok {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.stok-menipis {
+  color: var(--err-ink);
+}
+.label-menipis {
+  margin-left: 8px;
+  border: 1px solid var(--err-line);
+  background: var(--err-bg);
+  color: var(--err-ink);
+}
+
+.aksi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.aksi form {
+  display: block;
+  width: auto;
+}
+.aksi .tombol-garis,
+.aksi .tombol-bahaya {
+  min-height: 40px;
+  padding: 0 16px;
+}
+.tombol-bahaya {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--err-line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  font: inherit;
+  font-size: var(--t-isi);
+  font-weight: 500;
+}
+@media (pointer: coarse) {
+  .aksi .tombol-garis,
+  .aksi .tombol-bahaya {
+    min-height: 48px;
+  }
+}
+
+.kosong {
+  padding: 40px 16px;
+  color: var(--mute);
+  text-align: center;
+}
+
+/* ---------- form tambah dan edit ---------- */
+
+.grup select {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line-input);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  outline: 2px solid transparent;
+  transition:
+    border-color 0.15s,
+    outline-color 0.25s;
+}
+.grup select:hover {
+  border-color: var(--mute);
+}
+.grup select:focus-visible {
+  border-color: var(--brand);
+  outline-color: var(--brand);
+}
+
+.baris-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+}
+
+.aksi-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+@media (max-width: 959px) {
+  .kelola {
+    padding: 32px 24px 64px;
+  }
+}
+@media (max-width: 599px) {
+  .kelola {
+    padding: 24px 16px 64px;
+  }
+  .panel {
+    padding: 24px 16px;
+  }
+  .baris-2 {
+    grid-template-columns: 1fr;
+  }
+  .aksi-form > * {
+    width: 100%;
+  }
+  .toolbar-kanan {
+    width: 100%;
+  }
+  .toolbar-kanan .tombol {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pil,
+  .cari,
+  .grup select {
+    transition: none;
+  }
+}
